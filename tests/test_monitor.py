@@ -101,6 +101,36 @@ class TestHashFile(unittest.TestCase):
 
         self.assertEqual(hash_num, "185f8db32271fe25f561a6fc938b2e264306ec304eda518007d1764826381969")
     
+from monitor import scan_directory
+
+class TestScanDirectory(unittest.TestCase):
+
+    def test_scans_multiple_files(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+
+            (root / "hello.txt").write_text("Hello")
+            (root / "notes.txt").write_text("Some notes")
+
+            documents = root / "documents"
+            documents.mkdir()
+            (documents / "report.txt").write_text("Report contents")
+
+            results = scan_directory(root)
+
+            self.assertIn("hello.txt", results)
+            self.assertIn("notes.txt", results)
+            self.assertIn("documents/report.txt", results)
+            self.assertEqual(
+                results["hello.txt"],
+                hash_file(root / "hello.txt")
+            )
+            self.assertEqual(
+                results["documents/report.txt"],
+                hash_file(documents / "report.txt")
+            )
+            self.assertEqual(len(results), 3)
+            
 
 
 

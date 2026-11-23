@@ -105,63 +105,6 @@ def main():
     else:
         print("Unknown command")
 
-# TESTING OUR FUNCTIONS
-
-# Test 1: Hash one file
-print("TEST 1: Hashing")
-print(hash_file("sample_files/example.txt"))
-
-# Test 2: Scan a directory
-print("\nTEST 2: Directory scanning")
-results = scan_directory("sample_files")
-print(results)
-
-# Test 3: Save baseline
-print("\nTEST 3: Saving baseline")
-save_baseline(results, "baseline.json")
-print("Baseline saved!")
-
-# Test 4: Load baseline
-saved_hashes = load_baseline("baseline.json")
-print("Previously saved hashes:")
-print(saved_hashes)
-
-# Test 5: Comparing scans
-old_hashes = {
-    "notes.txt": "abc123",
-    "program.py": "def456",
-    "old_file.txt": "ghi789"
-}
-
-new_hashes = {
-    "notes.txt": "xyz123",
-    "program.py": "def456",
-    "new_file.txt": "jkl012"
-}
-
-added, modified, deleted = compare_scans(
-    old_hashes, new_hashes
-)
-
-print("Added:", added)
-print("Modified:", modified)
-print("Deleted:", deleted)
-
-# Load previously saved fingerprints
-old_hashes = load_baseline("baseline.json")
-
-# Scan the folder again
-new_hashes = scan_directory("sample_files")
-
-# Compare the results
-added, modified, deleted = compare_scans(old_hashes, new_hashes)
-
-print("Added:", added)
-print("Modified:", modified)
-print("Deleted:", deleted)
-
-
-
 if __name__ == "__main__":
     main()
 

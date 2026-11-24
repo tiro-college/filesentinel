@@ -1,6 +1,7 @@
 
 import hashlib
 from pathlib import Path
+import json
 
 def hash_file(file_path):
     hasher = hashlib.sha256()
@@ -90,8 +91,11 @@ def main():
             old_hashes = load_baseline("baseline.json")
 
         except FileNotFoundError:
-            return print("Error: No baseline found\n 'Run py monitor.py init' first")
-            
+            print("Error: No baseline found\n 'Run py monitor.py init' first")
+            return
+        except json.JSONDecodeError:
+            print("Error: Baseline file contains invalid JSON.")
+            return
         
         new_hashes = scan_directory("sample_files")
 

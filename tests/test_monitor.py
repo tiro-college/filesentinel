@@ -130,7 +130,27 @@ class TestScanDirectory(unittest.TestCase):
                 hash_file(documents / "report.txt")
             )
             self.assertEqual(len(results), 3)
-            
+
+from monitor import load_baseline
+import json
+class TestLoadBaseline(unittest.TestCase):
+
+    def test_missing_baseline(self):
+        with tempfile.TemporaryDirectory() as folder:
+            missing_file = Path(folder) / "nonexistent.json"
+
+            with self.assertRaises(FileNotFoundError):
+                load_baseline(missing_file)
+
+    def test_invalid_json(self):
+        with tempfile.TemporaryDirectory() as folder:
+            invalid_file = Path(folder) / "invalid.json"
+
+            invalid_file.write_text("This is not valid JSON!")
+
+            with self.assertRaises(json.JSONDecodeError):
+                load_baseline(invalid_file) 
+
 
 
 

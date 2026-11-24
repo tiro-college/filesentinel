@@ -151,7 +151,52 @@ class TestLoadBaseline(unittest.TestCase):
             with self.assertRaises(json.JSONDecodeError):
                 load_baseline(invalid_file) 
 
+from unittest.mock import patch
+from monitor import main
 
+class TestMain(unittest.TestCase):
+
+    def test_no_command(self):
+        with patch("sys.argv", ["monitor.py"]):
+            with patch("builtins.print") as mock_print:
+                main()
+
+            mock_print.assert_called_once_with(
+                "Please provide a command."
+            )
+
+    def test_unknown_command(self):
+        with patch("sys.argv", ["monitor.py", "banana"]):
+            with patch("builtins.print") as mock_print:
+                main()
+
+            mock_print.assert_called_once_with(
+                "Unknown command"
+            ) 
+
+    def test_check_missing_baseline(self):
+        with patch("sys.argv", ["monitor.py", "check"]):
+            with patch("monitor.load_baseline", side_effect=FileNotFoundError):
+                with patch("builtins.print") as mock_print:
+                    main()
+
+        mock_print.assert_any_call("Checking file integrity...")  
+        mock_print.assert_any_call("Error: No baseline found\n 'Run py monitor.py init' first")
+
+    def test_check_invalid_json(self):
+        error = json.JSONDecodeError("Invalid JSON", "invalid", 0)
+
+        with patch("sys.argv", ["monitor.py", "check"]):
+            with patch("monitor.load_baseline", side_effect=error):
+                with patch("builtins.print") as mock_print:
+                    main()
+
+        mock_print.assert_any_call(
+            "Checking file integrity..."
+        )
+        mock_print.assert_any_call(
+            "Error: Baseline file contains invalid JSON."
+        )
 
 
 if __name__ == "__main__":

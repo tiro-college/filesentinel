@@ -80,6 +80,12 @@ def main():
     if command == "init":
         print("Initializing FileSentinel...")
 
+        folder = Path(folder_path)
+        if not folder.is_dir():
+            print("Error: Invalid directory.")
+            return
+
+
         baseline = Path(baseline_path)
 
         if baseline.exists():
@@ -96,6 +102,12 @@ def main():
     elif command == "check":
         print("Checking file integrity...")
 
+        folder = Path(folder_path)
+        
+        if not folder.is_dir():
+            print("Error: Invalid directory.")
+            return
+
         try:
             old_hashes = load_baseline(baseline_path)
 
@@ -105,7 +117,7 @@ def main():
         except json.JSONDecodeError:
             print("Error: Baseline file contains invalid JSON.")
             return
-        
+   
         new_hashes = scan_directory(folder_path)
 
         added, modified, deleted = compare_scans(old_hashes, new_hashes)

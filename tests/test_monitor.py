@@ -207,5 +207,32 @@ class TestMain(unittest.TestCase):
         mock_print.assert_any_call("Error: Invalid number of arguments.")
         mock_print.assert_any_call("Usage: py monitor.py <init|check> <folder_path> <baseline_path>")
 
+    def test_init_invalid_directory(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            missing_folder = root / "nonexistent"
+            baseline = root / "baseline.json"
+
+            with patch("sys.argv", ["monitor.py", "init", str(missing_folder), str(baseline)]):
+                with patch("builtins.print") as mock_print:
+                    main()
+
+            mock_print.assert_any_call("Error: Invalid directory.")
+            self.assertFalse(baseline.exists())
+
+    def test_check_invalid_directory(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            missing_folder = root / "nonexistent"
+            baseline = root / "baseline.json"
+
+            with patch("sys.argv", ["monitor.py", "check", str(missing_folder), str(baseline)]):
+                with patch("monitor.load_baseline") as mock_load:
+                    with patch("builtins.print") as mock_print:
+                        main()
+                
+            mock_load.assert_not_called()    
+            mock_print.assert_any_call("Error: Invalid directory.")
+
 if __name__ == "__main__":
     unittest.main()

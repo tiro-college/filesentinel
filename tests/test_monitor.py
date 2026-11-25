@@ -260,6 +260,8 @@ class TestIntegration(unittest.TestCase):
 
             self.assertTrue(baseline.is_file())
 
+            original_baseline = baseline.read_text()
+
             (monitored / "notes.txt").write_text("Updated notes")
             (monitored / "old.txt").unlink()
             (monitored / "new.txt").write_text("New contents")
@@ -271,7 +273,8 @@ class TestIntegration(unittest.TestCase):
             mock_print.assert_any_call("Added:", ["new.txt"])
             mock_print.assert_any_call("Modified:", ["notes.txt"])
             mock_print.assert_any_call("Deleted:", ["old.txt"])
-
+            self.assertEqual(baseline.read_text(), original_baseline)
+            
 
 
 

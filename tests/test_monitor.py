@@ -175,7 +175,7 @@ class TestMain(unittest.TestCase):
             ) 
 
     def test_check_missing_baseline(self):
-        with patch("sys.argv", ["monitor.py", "check"]):
+        with patch("sys.argv", ["monitor.py", "check", "sample_files", "baseline.json"]):
             with patch("monitor.load_baseline", side_effect=FileNotFoundError):
                 with patch("builtins.print") as mock_print:
                     main()
@@ -186,7 +186,7 @@ class TestMain(unittest.TestCase):
     def test_check_invalid_json(self):
         error = json.JSONDecodeError("Invalid JSON", "invalid", 0)
 
-        with patch("sys.argv", ["monitor.py", "check"]):
+        with patch("sys.argv", ["monitor.py", "check", "sample_files", "baseline.json"]):
             with patch("monitor.load_baseline", side_effect=error):
                 with patch("builtins.print") as mock_print:
                     main()
@@ -198,6 +198,14 @@ class TestMain(unittest.TestCase):
             "Error: Baseline file contains invalid JSON."
         )
 
+    def test_invalid_arguments(self):
+
+        with patch("sys.argv", ["monitor.py", "check", "sample_files"]):
+            with patch("builtins.print") as mock_print:
+                main()
+
+        mock_print.assert_any_call("Error: Invalid number of arguments.")
+        mock_print.assert_any_call("Usage: py monitor.py <init|check> <folder_path> <baseline_path>")
 
 if __name__ == "__main__":
     unittest.main()

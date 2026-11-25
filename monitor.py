@@ -68,17 +68,26 @@ def main():
 
     command = sys.argv[1]
 
+    if command in ("init", 'check'):
+        if len(sys.argv) != 4:
+            print("Error: Invalid number of arguments.")
+            print("Usage: py monitor.py <init|check> <folder_path> <baseline_path>")
+            return
+        folder_path = sys.argv[2]
+        baseline_path = sys.argv[3]
+
+
     if command == "init":
         print("Initializing FileSentinel...")
 
-        baseline = Path("baseline.json")
+        baseline = Path(baseline_path)
 
         if baseline.exists():
             print("Error: Baseline already exists.")
             return
 
-        file_hashes = scan_directory("sample_files")
-        save_baseline(file_hashes, "baseline.json")
+        file_hashes = scan_directory(folder_path)
+        save_baseline(file_hashes, baseline_path)
 
         print("Baseline created successfully!")
 
@@ -88,7 +97,7 @@ def main():
         print("Checking file integrity...")
 
         try:
-            old_hashes = load_baseline("baseline.json")
+            old_hashes = load_baseline(baseline_path)
 
         except FileNotFoundError:
             print("Error: No baseline found\n 'Run py monitor.py init' first")
@@ -97,7 +106,7 @@ def main():
             print("Error: Baseline file contains invalid JSON.")
             return
         
-        new_hashes = scan_directory("sample_files")
+        new_hashes = scan_directory(folder_path)
 
         added, modified, deleted = compare_scans(old_hashes, new_hashes)
 

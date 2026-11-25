@@ -234,5 +234,47 @@ class TestMain(unittest.TestCase):
             mock_load.assert_not_called()    
             mock_print.assert_any_call("Error: Invalid directory.")
 
+
+class TestIntegration(unittest.TestCase):
+     
+    def test_complete_workflow(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+
+            monitored = root / "monitored"
+            monitored.mkdir()
+
+            baseline = root / "baseline.json"
+
+            (monitored / "notes.txt").write_text("Original notes")
+            (monitored / "old.txt").write_text("Old contents")
+
+            with patch("sys.argv", [
+                "monitor.py",
+                "init",
+                str(monitored),
+                str(baseline)
+            ]):
+                with patch("builtins.print"):
+                    main()
+
+            self.assertTrue(baseline.is_file())
+
+            (monitored / "notes.txt").write_text("Updated notes")
+            (monitored / "old.txt").unlink()
+            (monitored / "new.txt").write_text("New contents")
+
+            with patch("sys.argv", ["monitor.py", "check", str(monitored), str(baseline)]):
+                with patch("builtins.print") as mock_print:
+                    main()
+
+            mock_print.assert_any_call("Added:", ["new.txt"])
+            mock_print.assert_any_call("Modified:", ["notes.txt"])
+            mock_print.assert_any_call("Deleted:", ["old.txt"])
+
+
+
+
+
 if __name__ == "__main__":
     unittest.main()
